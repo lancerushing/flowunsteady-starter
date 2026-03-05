@@ -2,7 +2,7 @@
 
 julia_version = "1.12.2"
 manifest_format = "2.0"
-project_hash = "ba810ebca6ad66a19dbb6f601d148d2a458b8d1d"
+project_hash = "c0b1b4adfd84c47d03a30f55c2fc50388f81d7bc"
 
 [[deps.ANSIColoredPrinters]]
 git-tree-sha1 = "574baf8110975760d391c710b6341da1afa48d8c"
@@ -182,6 +182,12 @@ git-tree-sha1 = "e24a6f390e5563583bb4315c73035b5b3f3e7ab4"
 uuid = "7a955b69-7140-5f4e-a0ed-f168c5e2e749"
 version = "1.4.0"
 
+[[deps.CodeTracking]]
+deps = ["InteractiveUtils", "UUIDs"]
+git-tree-sha1 = "b7231a755812695b8046e8471ddc34c8268cbad5"
+uuid = "da1fd8a2-8d9e-5ec2-8556-3022fb5608a2"
+version = "3.0.0"
+
 [[deps.CodecZlib]]
 deps = ["TranscodingStreams", "Zlib_jll"]
 git-tree-sha1 = "962834c22b66e32aa10f7611c08c8ca4e20749a9"
@@ -229,6 +235,11 @@ weakdeps = ["Dates", "LinearAlgebra"]
 
     [deps.Compat.extensions]
     CompatLinearAlgebraExt = "LinearAlgebra"
+
+[[deps.Compiler]]
+git-tree-sha1 = "382d79bfe72a406294faca39ef0c3cef6e6ce1f1"
+uuid = "807dbc54-b67e-4c79-8afb-eafe4df6f2e1"
+version = "0.1.1"
 
 [[deps.CompilerSupportLibraries_jll]]
 deps = ["Artifacts", "Libdl"]
@@ -645,6 +656,12 @@ git-tree-sha1 = "a3f24677c21f5bbe9d2a714f95dcd58337fb2856"
 uuid = "82899510-4779-5014-852e-03e436cf321d"
 version = "1.0.0"
 
+[[deps.JET]]
+deps = ["CodeTracking", "Compiler", "InteractiveUtils", "JuliaInterpreter", "JuliaSyntax", "LoweredCodeUtils", "MacroTools", "Pkg", "PrecompileTools", "Preferences", "Revise", "Test"]
+git-tree-sha1 = "3642228b0d4ab0b263a5946f60ace6c2b5616256"
+uuid = "c3a54625-cd67-489e-a8e7-0a5a0ff4e31b"
+version = "0.11.3"
+
 [[deps.JLD]]
 deps = ["Compat", "FileIO", "H5Zblosc", "HDF5", "Printf"]
 git-tree-sha1 = "e42f32690d41f758e126a48ee43459ef91179d1f"
@@ -668,6 +685,17 @@ version = "1.4.0"
 
     [deps.JSON.weakdeps]
     ArrowTypes = "31f734f8-188a-4ce0-8406-c8a06bd891cd"
+
+[[deps.JuliaInterpreter]]
+deps = ["CodeTracking", "InteractiveUtils", "Random", "UUIDs"]
+git-tree-sha1 = "f5e59455236d8269b7868665c3665e8477af0e37"
+uuid = "aa1ae85d-cabe-5617-a682-6adf51b2e16a"
+version = "0.10.10"
+
+[[deps.JuliaSyntax]]
+git-tree-sha1 = "0d4b3dab95018bcf3925204475693d9f09dc45b8"
+uuid = "70703baa-626e-46a2-a12c-08ffd08c73b4"
+version = "1.0.2"
 
 [[deps.JuliaSyntaxHighlighting]]
 deps = ["StyledStrings"]
@@ -754,6 +782,12 @@ version = "0.3.29"
 [[deps.Logging]]
 uuid = "56ddb016-857b-54e1-b83d-db4d58db5568"
 version = "1.11.0"
+
+[[deps.LoweredCodeUtils]]
+deps = ["CodeTracking", "Compiler", "JuliaInterpreter"]
+git-tree-sha1 = "5d4278f755440f70648d80cc6225f51e78e94094"
+uuid = "6f1432cf-f94c-5a45-995e-cdbf5db27b0b"
+version = "3.5.1"
 
 [[deps.Lz4_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl"]
@@ -1046,6 +1080,16 @@ deps = ["ChainRulesCore", "DiffResults", "DiffRules", "ForwardDiff", "FunctionWr
 git-tree-sha1 = "f1b07322a8cdc0d46812473b37fb72f69ec07b22"
 uuid = "37e2e3b7-166d-5795-8a7a-e32c996b4267"
 version = "1.16.2"
+
+[[deps.Revise]]
+deps = ["CodeTracking", "FileWatching", "InteractiveUtils", "JuliaInterpreter", "LibGit2", "LoweredCodeUtils", "OrderedCollections", "Preferences", "REPL", "UUIDs"]
+git-tree-sha1 = "14d1bfb0a30317edc77e11094607ace3c800f193"
+uuid = "295af30f-e4ad-537b-8983-00126c2a3abe"
+version = "3.13.2"
+weakdeps = ["Distributed"]
+
+    [deps.Revise.extensions]
+    DistributedExt = "Distributed"
 
 [[deps.Roots]]
 deps = ["Accessors", "CommonSolve", "Printf"]

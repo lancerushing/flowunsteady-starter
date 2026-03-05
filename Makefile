@@ -36,6 +36,21 @@ run-step-3:
 	xhost +local:docker
 	$(DOCKER_RUN) $(IMAGE) julia --project src/step3_rotorhover_aero_acoustics.jl
 
+## Format Julia source files with JuliaFormatter (uses temp env, no project changes)
+format:
+	$(DOCKER_RUN) $(IMAGE) julia -e \
+		'import Pkg; Pkg.activate(temp=true); Pkg.add("JuliaFormatter"); \
+		using JuliaFormatter; format("/workspace/src/", verbose=true)'
+
+## Lint Julia source files with JET static analyzer
+## NOTE: adds JET to the workspace project on first run
+lint:
+	$(DOCKER_RUN) $(IMAGE) julia --project -e \
+		'import Pkg; Pkg.add("JET"); using JET; \
+		for f in filter(f->endswith(f,".jl"), readdir("/workspace/src/", join=true)); \
+			println("\nAnalyzing: ", basename(f)); report_file(f); \
+		end'
+
 ## Utility target to run bash command to explore container
 run-bash:
 	xhost +local:docker
