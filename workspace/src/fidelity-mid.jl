@@ -1,7 +1,5 @@
 # MID-HIGH fidelity profile — loaded by config-loader.jl
 
-const run_name = "fidelity-mid"
-
 # ---- MID-HIGH FIDELITY -------------------------------------------------------
 # Blade discretization
 const n                         = 50    # Number of blade elements per blade

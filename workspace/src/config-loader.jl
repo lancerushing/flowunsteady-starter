@@ -1,13 +1,28 @@
 # Set FIDELITY below, then include this file at the top of each step script:
 #   include(joinpath(@__DIR__, "config-loader.jl"))
 #
-# Valid values: "low", "mid", "high"
+# Valid values: "lowest", "low", "mid", "high"
 
-const FIDELITY = "low"
+const FIDELITY = "lowest"
+
+# Load fidelity based settings
+if FIDELITY == "lowest"
+    include(joinpath(@__DIR__, "fidelity-lowest.jl"))
+elseif FIDELITY == "low"
+    include(joinpath(@__DIR__, "fidelity-low.jl"))
+elseif FIDELITY == "mid"
+    include(joinpath(@__DIR__, "fidelity-mid.jl"))
+elseif FIDELITY == "high"
+    include(joinpath(@__DIR__, "fidelity-high.jl"))
+else
+    error("Unknown FIDELITY value: \"$(FIDELITY)\". Expected \"lowest\", \"low\", \"mid\", or \"high\".")
+end
+
+const run_name = "rotorhover"
 
 # Paths
 const PROJECT_DIR = dirname(Base.active_project())
-const sims_path   = joinpath(PROJECT_DIR, "output")
+const sims_path   = joinpath(PROJECT_DIR, "output", "fidelity-$(FIDELITY)")
 
 # Rotor geometry
 const rotor_file  = "DJI9443.csv"
@@ -32,12 +47,3 @@ const sph_thtmax   = 360
 const sph_phimax   = 180
 const sph_rotation = [90, 0, 0]
 
-if FIDELITY == "low"
-    include(joinpath(@__DIR__, "fidelity-low.jl"))
-elseif FIDELITY == "mid"
-    include(joinpath(@__DIR__, "fidelity-mid.jl"))
-elseif FIDELITY == "high"
-    include(joinpath(@__DIR__, "fidelity-high.jl"))
-else
-    error("Unknown FIDELITY value: \"$(FIDELITY)\". Expected \"low\", \"mid\", or \"high\".")
-end

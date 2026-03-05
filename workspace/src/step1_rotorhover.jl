@@ -29,8 +29,7 @@ read_polar      = vlm.ap.read_polar2        # What polar reader to use
 #       files.
 
 # Discretization
-n               = 20                        # Number of blade elements per blade
-r               = 1/10                      # Geometric expansion of elements
+r               = r_expansion                      # Geometric expansion of elements
 
 # NOTE: Here a geometric expansion of 1/10 means that the spacing between the
 #       tip elements is 1/10 of the spacing between the hub elements. Refine the
@@ -74,43 +73,24 @@ nsteps          = const_solution ? 2 : nrevs*nsteps_per_rev # Number of time ste
 ttot            = nsteps/nsteps_per_rev / (RPM/60)       # (s) total simulation time
 
 # VPM particle shedding
-p_per_step      = 4                         # Sheds per time step
-shed_starting   = false                     # Whether to shed starting vortex
 shed_unsteady   = true                      # Whether to shed vorticity from unsteady loading
 unsteady_shedcrit = 0.001                   # Shed unsteady loading whenever circulation
                                             #  fluctuates by more than this ratio
 max_particles   = ((2*n+1)*B)*nsteps*p_per_step + 1 # Maximum number of particles
 
 # Regularization
-sigma_rotor_surf= R/10                      # Rotor-on-VPM smoothing radius
-lambda_vpm      = 2.125                     # VPM core overlap
-                                            # VPM smoothing radius
+sigma_rotor_surf    = R / sigma_rotor_surf_divisor  # Rotor-on-VPM smoothing radius
+lambda_vpm          = 2.125                         # VPM core overlap
+                                                    # VPM smoothing radius
 sigma_vpm_overwrite = lambda_vpm * 2*pi*R/(nsteps_per_rev*p_per_step)
-sigmafactor_vpmonvlm= 1                     # Shrink particles by this factor when
-                                            #  calculating VPM-on-VLM/Rotor induced velocities
 
 # Rotor solver
 vlm_rlx         = 0.5                       # VLM relaxation <-- this also applied to rotors
 hubtiploss_correction = ((0.4, 5, 0.1, 0.05), (2, 1, 0.25, 0.05)) # Hub and tip correction
 
-# VPM solver
-vpm_integration = vpm.euler                 # VPM temporal integration scheme
-# vpm_integration = vpm.rungekutta3
-
+# VPM solver  (vpm_integration and vpm_SFS set by fidelity profile in config-loader.jl)
 vpm_viscous     = vpm.Inviscid()            # VPM viscous diffusion scheme
 # vpm_viscous   = vpm.CoreSpreading(-1, -1, vpm.zeta_fmm; beta=100.0, itmax=20, tol=1e-1)
-
-vpm_SFS         = vpm.SFS_none              # VPM LES subfilter-scale model
-# vpm_SFS       = vpm.SFS_Cd_twolevel_nobackscatter
-# vpm_SFS       = vpm.SFS_Cd_threelevel_nobackscatter
-# vpm_SFS       = vpm.DynamicSFS(vpm.Estr_fmm, vpm.pseudo3level_positive;
-#                                   alpha=0.999, maxC=1.0,
-#                                   clippings=[vpm.clipping_backscatter])
-# vpm_SFS       = vpm.DynamicSFS(vpm.Estr_fmm, vpm.pseudo3level_positive;
-#                                   alpha=0.999, rlxf=0.005, minC=0, maxC=1
-#                                   clippings=[vpm.clipping_backscatter],
-#                                   controls=[vpm.control_sigmasensor],
-#                                   )
 
 # NOTE: In most practical situations, open rotors operate at a Reynolds number
 #       high enough that viscous diffusion in the wake is actually negligible.
@@ -141,7 +121,7 @@ end
 #       avoiding the fountain effect altogether.
 #       This is especially helpful in low and mid-fidelity simulations.
 
-suppress_fountain   = true                  # Toggle
+# suppress_fountain set by fidelity profile in config-loader.jl
 
 # Suppress wake shedding on blade elements inboard of this r/R radial station
 no_shedding_Rthreshold = suppress_fountain ? 0.35 : 0.0

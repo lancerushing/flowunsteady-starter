@@ -1,13 +1,13 @@
-# MID-LOW fidelity profile — loaded by config-loader.jl
+# Low fidelity profile — loaded by config-loader.jl
+# Good for quick runs to test the software
 
-
-# ---- MID-LOW FIDELITY --------------------------------------------------------
+# ---- LOW FIDELITY --------------------------------------------------------
 # Blade discretization
-const n                         = 20    # Number of blade elements per blade
+const n                         = 10    # Number of blade elements per blade
 const r_expansion               = 1/10  # Geometric expansion (tip/hub spacing ratio)
 
 # Time discretization - steps 2-4 must match step 1
-const nsteps_per_rev            = 36    # Time steps per revolution
+const nsteps_per_rev            = 18    # Time steps per revolution
 
 # VPM particle shedding
 const p_per_step                = 4     # Particle sheds per time step
