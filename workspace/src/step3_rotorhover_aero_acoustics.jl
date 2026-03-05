@@ -252,7 +252,7 @@ We start by reading the outputs from PSU-WOPWOP and BPM:
 # Dataset to read and associated information
 dataset_infos = [ # (label, PWW solution, BPM solution, line style, color)
                     ("FLOWUnsteady",
-                        joinpath(sims_path, run_name*"-pww/runcase/"),
+                        joinpath(sims_path, run_name*"-aero_acoustics/runcase/"),
                         joinpath(sims_path, run_name*"-bpm"),
                         "-", "steelblue"),
                 ]
