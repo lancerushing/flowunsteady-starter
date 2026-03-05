@@ -41,6 +41,7 @@
         "libbz",
         "libncursesw",
         "libopenmpi",
+        "libpython",
         "libreadline",
         "libsqlite",
         "libxmlsec",
