@@ -58,12 +58,12 @@ R, B            = uns.read_rotor(rotor_file; data_path=data_path)[[1,3]]
 rotorsystems    = [[B]]                # rotorsystems[si][ri] is the number of blades of the ri-th rotor in the si-th system
 
 # Aero input parameters
-nrevs           = 2                    # Number of revolutions to read
+aero_nrevs      = 2                    # Number of revolutions to read
 nrevs_min       = 6                    # Start reading from this revolution
 num_min         = ceil(Int, nrevs_min*nsteps_per_rev) # Start reading aero files from this step number
 
 if const_solution                       # If constant solution, it overrides to read only the first time step
-    nrevs       = nothing
+    aero_nrevs  = nothing
     nsteps_per_rev_wopwop = nothing
     num_min     = 1
 else
@@ -110,7 +110,7 @@ println("num_min $(num_min)")
 # ------------ RUN PSU-WOPWOP --------------------------------------------------
 @time uns.run_noise_wopwop(read_path, run_name, RPM, rho, speedofsound, rotorsystems,
                             ww_nrevs, ww_nsteps_per_rev, save_ww_path, wopwopbin;
-                            nrevs=nrevs, nsteps_per_rev=nsteps_per_rev_wopwop,
+                            nrevs=aero_nrevs, nsteps_per_rev=nsteps_per_rev_wopwop,
                             # ---------- OBSERVERS -------------------------
                             sph_R=sph_R,
                             sph_nR=sph_nR, sph_ntht=sph_ntht,
