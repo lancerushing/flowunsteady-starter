@@ -4,10 +4,10 @@ FIDELITY ?= lowest
 
 ## `--threads "auto" or "N" when (N>1)` triggers 
 ##  a segfault for step1 for fidelity "low" or higher
-STEP1RUN = $(DOCKER_RUN) $(IMAGE) julia --project src/step1_rotorhover.jl
-STEP2RUN = $(DOCKER_RUN) $(IMAGE) julia --threads auto --project src/step2_rotorhover_fluid_domain.jl
-STEP3RUN = $(DOCKER_RUN) $(IMAGE) julia --threads auto --project src/step3_rotorhover_aero_acoustics.jl
-STEP4RUN = $(DOCKER_RUN) $(IMAGE) julia --threads auto --project src/step4_rotorhover_post_processing.jl
+STEP1RUN = $(DOCKER_RUN_HEADLESS) $(IMAGE) julia --project src/step1_rotorhover.jl
+STEP2RUN = $(DOCKER_RUN_HEADLESS) $(IMAGE) julia --threads auto --project src/step2_rotorhover_fluid_domain.jl
+STEP3RUN = $(DOCKER_RUN_HEADLESS) $(IMAGE) julia --threads auto --project src/step3_rotorhover_aero_acoustics.jl
+STEP4RUN = $(DOCKER_RUN_HEADLESS) $(IMAGE) julia --threads auto --project src/step4_rotorhover_post_processing.jl
 
 
 DOCKER_RUN = docker run --rm \
@@ -22,6 +22,15 @@ DOCKER_RUN = docker run --rm \
 	-e FIDELITY=$(FIDELITY) \
 	--privileged
 
+# Headless variant: no X11 forwarding, matplotlib renders to PNG without a display
+DOCKER_RUN_HEADLESS = docker run --rm \
+	--volume $(CURDIR)/workspace:/workspace \
+	--volume $(CURDIR)/.julia:/home/runner/.julia \
+	-e OMP_NUM_THREADS=$(shell nproc) \
+	-e FIDELITY=$(FIDELITY) \
+	-e MPLBACKEND=Agg \
+	--privileged
+
 # build a container to run julia. Container does not need context
 # see: https://docs.docker.com/build/concepts/context/#empty-context
 docker-build:
@@ -33,7 +42,6 @@ prepare-julia:
 	$(DOCKER_RUN) -it $(IMAGE) julia --project src/_setup.jl
 
 run-step-1:
-	xhost +local:docker
 	echo "$(STEP1RUN)" >> $(LOG)_step1.log
 	$(STEP1RUN) 2>&1 | tee -a $(LOG)_step1.log
 
@@ -42,30 +50,27 @@ visualize-step-1:
 	$(DOCKER_RUN) $(IMAGE) julia --project src/step1_visualize.jl
 
 run-step-2:
-	xhost +local:docker
 	echo "$(STEP2RUN)" >> $(LOG)_step2.log
 	$(STEP2RUN) 2>&1 | tee -a $(LOG)_step2.log
 
 run-step-3:
-	xhost +local:docker
 	echo "$(STEP3RUN)" >> $(LOG)_step3.log
 	$(STEP3RUN) 2>&1 | tee -a $(LOG)_step3.log
 
 run-step-4:
-	xhost +local:docker
 	echo "$(STEP4RUN)" >> $(LOG)_step4.log
 	$(STEP4RUN) 2>&1 | tee -a $(LOG)_step4.log
 
 ## Format Julia source files with JuliaFormatter (uses temp env, no project changes)
 format:
-	$(DOCKER_RUN) $(IMAGE) julia -e \
+	$(DOCKER_RUN_HEADLESS) $(IMAGE) julia -e \
 		'import Pkg; Pkg.activate(temp=true); Pkg.add("JuliaFormatter"); \
 		using JuliaFormatter; format("/workspace/src/", verbose=true)'
 
 ## Lint Julia source files with JET static analyzer
 ## NOTE: adds JET to the workspace project on first run
 lint:
-	$(DOCKER_RUN) $(IMAGE) julia --project -e \
+	$(DOCKER_RUN_HEADLESS) $(IMAGE) julia --project -e \
 		'import Pkg; Pkg.add("JET"); using JET; \
 		for f in filter(f->endswith(f,".jl"), readdir("/workspace/src/", join=true)); \
 			println("\nAnalyzing: ", basename(f)); report_file(f); \

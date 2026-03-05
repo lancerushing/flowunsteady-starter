@@ -49,6 +49,7 @@
         "meansigma",
         "midhigh",
         "midlow",
+        "MPLBACKEND",
         "mpmath",
         "nblades",
         "ncrit",

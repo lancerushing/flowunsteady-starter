@@ -2,7 +2,9 @@
 
 Self-contained Docker runner for a DJI 9443 rotor-in-hover simulation using [FLOWUnsteady](https://flow.byu.edu/FLOWUnsteady/).
 
-Requires Linux with `docker-ce` (not Docker Desktop). X11 forwarding relies on Unix sockets and does not work with Docker Desktop. Tested on Debian 12.5 (GNOME) and Arch (Wayland).
+Requires Linux with Docker installed. May work on Docker Desktop's WSL2 backend on Windows, but this is untested.
+
+To use visualization tools (ParaView, live plots), use `docker-ce` rather than Docker Desktop. X11 forwarding relies on Unix sockets, which Docker Desktop does not support. Tested on Debian 12.5 (GNOME) and Arch Linux (Wayland).
 
 For background on why this Docker runner exists, see [docs/HISTORY.md](docs/HISTORY.md).
 
