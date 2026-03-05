@@ -21,19 +21,39 @@ make prepare-julia
 Steps must be run in order. Each step reads output from the previous one.
 
 ```bash
-make run-step-1    # Aerodynamic simulation (rVPM + VLM), takes 2 hours
+make run-step-1    # Aerodynamic simulation (rVPM + VLM)
 make run-step-2    # Fluid domain visualization grid
 make run-step-3    # Aero-acoustic noise prediction
-make run-step-4    # Post-processing and plots
+make run-step-4    # Post-processing and comparison plots
 ```
 
 > **Step 3 requires** `workspace/bin/wopwop3` (PSU-WOPWOP binary, not included).
 
-Outputs are written to `workspace/output/`.
+Outputs are written to `workspace/output/fidelity-<level>/`.
+
+### Fidelity levels
+
+Pass `FIDELITY=<level>` to any step target. Valid levels:
+
+| Level    | `n` | Steps/rev | Use              |
+| -------- | --- | --------- | ---------------- |
+| `lowest` |  20 |         6 | Quick smoke test |
+| `low`    |  20 |        36 | Development      |
+| `mid`    |  50 |        72 | Production       |
+| `high`   |  50 |       360 | High-accuracy    |
+
+```bash
+make run-step-1 FIDELITY=lowest   # default
+make run-step-1 FIDELITY=low
+make run-step-1 FIDELITY=mid
+make run-step-1 FIDELITY=high
+```
+
+Each fidelity level writes to its own output directory, so runs do not overwrite each other. Step 4 reads all four directories and plots them together.
 
 ## Configuration
 
-Edit [`workspace/src/config.jl`](workspace/src/config.jl) to change simulation parameters (RPM, rotor geometry, fidelity settings, etc.). All step scripts share this file - do not duplicate values across steps.
+Edit [`workspace/src/config-loader.jl`](workspace/src/config-loader.jl) to change simulation parameters shared across all steps (RPM, rotor geometry, operating conditions, acoustic observer geometry). Fidelity-specific discretization parameters live in the corresponding `workspace/src/fidelity-<level>.jl` file.
 
 ## Debugging
 

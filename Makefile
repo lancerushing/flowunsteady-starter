@@ -1,5 +1,6 @@
 IMAGE = flowunsteady-runner:dev
-LOG = logs/$$(date +%Y%m%d_%H%M%S)
+LOG = logs/$$(date +%Y%m%d_%H%M%S)_$(FIDELITY)
+FIDELITY ?= lowest
 
 ## `--threads "auto" or "N" when (N>1)` triggers 
 ##  a segfault for step1 for fidelity "low" or higher
@@ -18,6 +19,7 @@ DOCKER_RUN = docker run --rm \
 	-e DISPLAY=$(DISPLAY) \
 	-e XDG_RUNTIME_DIR=$(XDG_RUNTIME_DIR) \
 	-e OMP_NUM_THREADS=$(shell nproc) \
+	-e FIDELITY=$(FIDELITY) \
 	--privileged
 
 # build a container to run julia. Container does not need context

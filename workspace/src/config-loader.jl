@@ -3,7 +3,7 @@
 #
 # Valid values: "lowest", "low", "mid", "high"
 
-const FIDELITY = "low"
+const FIDELITY = get(ENV, "FIDELITY", "lowest")
 
 # Load fidelity based settings
 if FIDELITY == "lowest"
