@@ -1,10 +1,8 @@
-IMAGE = flowunsteady-runner:dev
+IMAGE = flowunsteady-runner:dev-py39
 LOG = logs/$$(date +%Y%m%d_%H%M%S)_$(FIDELITY)
 FIDELITY ?= lowest
 
-## `--threads "auto" or "N" when (N>1)` triggers 
-##  a segfault for step1 for fidelity "low" or higher
-STEP1RUN = $(DOCKER_RUN_HEADLESS) $(IMAGE) julia --project src/step1_rotorhover.jl
+STEP1RUN = $(DOCKER_RUN_HEADLESS) $(IMAGE) julia --threads auto --project src/step1_rotorhover.jl
 STEP2RUN = $(DOCKER_RUN_HEADLESS) $(IMAGE) julia --threads auto --project src/step2_rotorhover_fluid_domain.jl
 STEP3RUN = $(DOCKER_RUN_HEADLESS) $(IMAGE) julia --threads auto --project src/step3_rotorhover_aero_acoustics.jl
 STEP4RUN = $(DOCKER_RUN_HEADLESS) $(IMAGE) julia --threads auto --project src/step4_rotorhover_post_processing.jl
@@ -38,10 +36,11 @@ docker-build:
 
 ## Install Julia packages
 prepare-julia:
-	xhost +local:docker
-	$(DOCKER_RUN) -it $(IMAGE) julia --project src/_setup.jl
+	mkdir -p ./.julia
+	$(DOCKER_RUN_HEADLESS) -it $(IMAGE) julia --threads auto --project src/_setup.jl
 
 run-step-1:
+	mkdir -p ./logs
 	echo "$(STEP1RUN)" >> $(LOG)_step1.log
 	$(STEP1RUN) 2>&1 | tee -a $(LOG)_step1.log
 
@@ -68,7 +67,6 @@ format:
 		using JuliaFormatter; format("/workspace/src/", verbose=true)'
 
 ## Lint Julia source files with JET static analyzer
-## NOTE: adds JET to the workspace project on first run
 lint:
 	$(DOCKER_RUN_HEADLESS) $(IMAGE) julia --project -e \
 		'import Pkg; Pkg.add("JET"); using JET; \

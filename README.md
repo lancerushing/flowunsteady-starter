@@ -11,7 +11,7 @@ For background on why this Docker runner exists, see [docs/HISTORY.md](docs/HIST
 ## Setup
 
 ```bash
-# Build the Docker image
+# Build the Docker image (run once, takes 5 min)
 make docker-build
 
 # Install Julia packages (run once - saves to .julia/, takes ~10-30 min)
@@ -37,12 +37,15 @@ Outputs are written to `workspace/output/fidelity-<level>/`.
 
 Pass `FIDELITY=<level>` to any step target. Valid levels:
 
-| Level    | `n` | Steps/rev | Use              |
-| -------- | --- | --------- | ---------------- |
-| `lowest` |  20 |         6 | Quick smoke test |
-| `low`    |  20 |        36 | Development      |
-| `mid`    |  50 |        72 | Production       |
-| `high`   |  50 |       360 | High-accuracy    |
+
+| Level    | `n` | Steps/rev | Use              | Step 1 RunTime |
+| -------- | --- | --------- | ---------------- | -------------- |
+| `lowest` |  20 |         6 | Quick smoke test | 2 minutes      |
+| `low`    |  20 |        36 | Development      | 24 minutes     |
+| `mid`    |  50 |        72 | Production       | ? hours        |
+| `high`   |  50 |       360 | High-accuracy    | ?? hours       |
+
+* Run times measured on AMD Ryzen 5 5600X
 
 ```bash
 make run-step-1 FIDELITY=lowest   # default
