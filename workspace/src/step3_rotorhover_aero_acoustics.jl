@@ -108,8 +108,8 @@ println("num_min $(num_min)")
 
 
 # ------------ RUN PSU-WOPWOP --------------------------------------------------
-ww_nrevs, ww_nsteps_per_rev, save_ww_path, wopwopbin;
 @time uns.run_noise_wopwop(read_path, run_name, RPM, rho, speedofsound, rotorsystems,
+                            ww_nrevs, ww_nsteps_per_rev, save_ww_path, wopwopbin;
                             nrevs=nrevs, nsteps_per_rev=nsteps_per_rev_wopwop,
                             # ---------- OBSERVERS -------------------------
                             sph_R=sph_R,
@@ -128,7 +128,7 @@ ww_nrevs, ww_nsteps_per_rev, save_ww_path, wopwopbin;
                             highpass=highpass,
                             # ---------- OUTPUT OPTIONS --------------------
                             verbose=true, v_lvl=0,
-                            prompt=true, debug_paraview=false,
+                            prompt=false, debug_paraview=false,
                             debuglvl=0,                     # PSU-WOPWOP debug level (verbose)
                             observerf_name="observergrid",  # .xyz file with observer grid
                             case_name="runcase",            # Name of case to create and run

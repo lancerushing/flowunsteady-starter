@@ -34,7 +34,7 @@ run-step-2:
 
 run-step-3:
 	xhost +local:docker
-	$(DOCKER_RUN) $(IMAGE) julia --project src/step3_rotorhover_aero_acoustic.jl
+	$(DOCKER_RUN) $(IMAGE) julia --project src/step3_rotorhover_aero_acoustics.jl
 
 ## Utility target to run bash command to explore container
 run-bash:
