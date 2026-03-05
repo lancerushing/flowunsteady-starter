@@ -18,7 +18,12 @@ else
     error("Unknown FIDELITY value: \"$(FIDELITY)\". Expected \"lowest\", \"low\", \"mid\", or \"high\".")
 end
 
+println("################################################################")
+println("Fidelity: $(FIDELITY)")
+println("################################################################")
+
 const run_name = "rotorhover"
+const nrevs    = 10                         # Number of revolutions in simulation
 
 # Paths
 const PROJECT_DIR = dirname(Base.active_project())

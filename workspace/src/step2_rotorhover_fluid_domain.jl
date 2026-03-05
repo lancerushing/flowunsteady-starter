@@ -18,12 +18,10 @@ read_path       = joinpath(sims_path, run_name)           # Where to read simula
 pfield_prefix   = run_name*"_pfield"        # Prefix of particle field files to read
 staticpfield_prefix = run_name*"_staticpfield"  # Prefix of static particle field files to read
 
-nums            = [359]              # Time steps to process
-# the pfield runs step 0→360 but staticpfield only 0→359.
-# This is likely because static particles (embedded in solid surfaces)
-# are written at the start of each step, while the particle field is written at the end,
-# so staticpfield always lags one step behind.
-# @show nums; exit()
+number_of_time_steps            = [nrevs * nsteps_per_rev - 1]  # Time steps to process
+# staticpfield lags one step behind pfield (static particles written at step start,
+# pfield written at step end), so the last valid combined step is nsteps-1.
+# @show number_of_time_steps; exit()
 
 # OUTPUT OPTIONS
 save_path       = joinpath(sims_path, run_name*"-fdom")   # Where to save fluid domain
@@ -93,14 +91,14 @@ preprocessing_pfield = uns.generate_preprocessing_fluiddomain_pfield(maxsigma, m
 
 nthreads        = 1                         # Total number of threads
 nthread         = 1                         # Number of this thread
-dnum = floor(Int, length(nums)/nthreads)    # Number of time steps per thread
-threaded_nums = [view(nums, dnum*i+1:(i<nthreads-1 ? dnum*(i+1) : length(nums))) for i in 0:nthreads-1]
+dnum = floor(Int, length(number_of_time_steps)/nthreads)    # Number of time steps per thread
+threaded_number_of_time_steps = [view(number_of_time_steps, dnum*i+1:(i<nthreads-1 ? dnum*(i+1) : length(number_of_time_steps))) for i in 0:nthreads-1]
 
-for these_nums in threaded_nums[nthread:nthread]
+for these_number_of_time_steps in threaded_number_of_time_steps[nthread:nthread]
 
      uns.computefluiddomain(    Pmin, Pmax, NDIVS,
                                 maxparticles,
-                                these_nums, read_path, pfield_prefix;
+                                these_number_of_time_steps, read_path, pfield_prefix;
                                 Oaxis=Oaxis,
                                 fmm=fmm,
                                 f_sigma=f_sigma,
