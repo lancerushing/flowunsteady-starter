@@ -3,15 +3,10 @@ LOG = logs/$$(date +%Y%m%d_%H%M%S)
 
 ## `--threads "auto" or "N" when (N>1)` triggers 
 ##  a segfault for step1 for fidelity "low" or higher
+STEP1RUN = $(DOCKER_RUN) $(IMAGE) julia --project src/step1_rotorhover.jl
+STEP2RUN = $(DOCKER_RUN) $(IMAGE) julia --threads auto --project src/step2_rotorhover_fluid_domain.jl
+STEP3RUN = $(DOCKER_RUN) $(IMAGE) julia --threads auto --project src/step3_rotorhover_aero_acoustics.jl
 
-JULIA = julia --threads auto 
-#JULIA = julia
-
-STEP1 = src/step1_rotorhover.jl
-STEP2 = src/step2_rotorhover_fluid_domain.jl
-STEP3 = src/step3_rotorhover_aero_acoustics.jl
-
-RUN = $(DOCKER_RUN) $(IMAGE) $(JULIA) --project
 
 DOCKER_RUN = docker run --rm \
 	--volume $(CURDIR)/workspace:/workspace \
@@ -32,26 +27,26 @@ docker-build:
 ## Install Julia packages
 prepare-julia:
 	xhost +local:docker
-	$(DOCKER_RUN) -it $(IMAGE) $(JULIA) --project src/_setup.jl
+	$(DOCKER_RUN) -it $(IMAGE) julia --project src/_setup.jl
 
 run-step-1:
 	xhost +local:docker
-	echo "$(RUN) $(STEP1)" >> $(LOG)_step1.log
-	$(RUN) $(STEP1) 2>&1 | tee -a $(LOG)_step1.log
+	echo "$(STEP1RUN)" >> $(LOG)_step1.log
+	$(STEP1RUN) 2>&1 | tee -a $(LOG)_step1.log
 
 visualize-step-1:
 	xhost +local:docker
-	$(RUN) src/step1_visualize.jl
+	$(DOCKER_RUN) $(IMAGE) julia --project src/step1_visualize.jl
 
 run-step-2:
 	xhost +local:docker
-	echo "$(RUN) $(STEP2)" >> $(LOG)_step2.log
-	$(RUN) $(STEP2) 2>&1 | tee -a $(LOG)_step2.log
+	echo "$(STEP2RUN)" >> $(LOG)_step2.log
+	$(STEP2RUN) 2>&1 | tee -a $(LOG)_step2.log
 
 run-step-3:
 	xhost +local:docker
-	echo "$(RUN) $(STEP3)" >> $(LOG)_step3.log
-	$(RUN) $(STEP3) 2>&1 | tee -a $(LOG)_step3.log
+	echo "$(STEP3RUN)" >> $(LOG)_step3.log
+	$(STEP3RUN) 2>&1 | tee -a $(LOG)_step3.log
 
 ## Format Julia source files with JuliaFormatter (uses temp env, no project changes)
 format:
@@ -62,7 +57,7 @@ format:
 ## Lint Julia source files with JET static analyzer
 ## NOTE: adds JET to the workspace project on first run
 lint:
-	$(DOCKER_RUN) $(IMAGE) $(JULIA) --project -e \
+	$(DOCKER_RUN) $(IMAGE) julia --project -e \
 		'import Pkg; Pkg.add("JET"); using JET; \
 		for f in filter(f->endswith(f,".jl"), readdir("/workspace/src/", join=true)); \
 			println("\nAnalyzing: ", basename(f)); report_file(f); \
