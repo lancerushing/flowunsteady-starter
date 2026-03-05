@@ -1,4 +1,6 @@
 IMAGE = flowunsteady-runner:dev
+LOG = logs/$$(date +%Y%m%d_%H%M%S)
+JULIA = julia --threads auto
 
 DOCKER_RUN = docker run --rm \
 	--volume $(CURDIR)/workspace:/workspace \
@@ -8,6 +10,7 @@ DOCKER_RUN = docker run --rm \
 	$(if $(WAYLAND_DISPLAY),--volume $(XDG_RUNTIME_DIR)/$(WAYLAND_DISPLAY):$(XDG_RUNTIME_DIR)/$(WAYLAND_DISPLAY)) \
 	-e DISPLAY=$(DISPLAY) \
 	-e XDG_RUNTIME_DIR=$(XDG_RUNTIME_DIR) \
+	-e OMP_NUM_THREADS=$(shell nproc) \
 	--privileged
 
 # build a container to run julia. Container does not need context
@@ -18,23 +21,27 @@ docker-build:
 ## Install Julia packages
 prepare-julia:
 	xhost +local:docker
-	$(DOCKER_RUN) -it $(IMAGE) julia --project src/_setup.jl
+	$(DOCKER_RUN) -it $(IMAGE) $(JULIA) --project src/_setup.jl
 
 run-step-1:
 	xhost +local:docker
-	$(DOCKER_RUN) $(IMAGE) julia --project src/step1_rotorhover.jl
+	@mkdir -p logs
+	$(DOCKER_RUN) $(IMAGE) $(JULIA) --project src/step1_rotorhover.jl 2>&1 | tee $(LOG)_step1.log
 
 visualize-step-1:
 	xhost +local:docker
-	$(DOCKER_RUN) $(IMAGE) julia --project src/step1_visualize.jl
+	@mkdir -p logs
+	$(DOCKER_RUN) $(IMAGE) $(JULIA) --project src/step1_visualize.jl
 
 run-step-2:
 	xhost +local:docker
-	$(DOCKER_RUN) $(IMAGE) julia --project src/step2_rotorhover_fluid_domain.jl
+	@mkdir -p logs
+	$(DOCKER_RUN) $(IMAGE) $(JULIA) --project src/step2_rotorhover_fluid_domain.jl 2>&1 | tee $(LOG)_step2.log
 
 run-step-3:
 	xhost +local:docker
-	$(DOCKER_RUN) $(IMAGE) julia --project src/step3_rotorhover_aero_acoustics.jl
+	@mkdir -p logs
+	$(DOCKER_RUN) $(IMAGE) $(JULIA) --project src/step3_rotorhover_aero_acoustics.jl 2>&1 | tee $(LOG)_step3.log
 
 ## Format Julia source files with JuliaFormatter (uses temp env, no project changes)
 format:
@@ -45,7 +52,7 @@ format:
 ## Lint Julia source files with JET static analyzer
 ## NOTE: adds JET to the workspace project on first run
 lint:
-	$(DOCKER_RUN) $(IMAGE) julia --project -e \
+	$(DOCKER_RUN) $(IMAGE) $(JULIA) --project -e \
 		'import Pkg; Pkg.add("JET"); using JET; \
 		for f in filter(f->endswith(f,".jl"), readdir("/workspace/src/", join=true)); \
 			println("\nAnalyzing: ", basename(f)); report_file(f); \
