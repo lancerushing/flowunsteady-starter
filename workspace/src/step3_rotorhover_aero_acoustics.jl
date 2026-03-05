@@ -497,5 +497,5 @@ noise.plot_directivity_oaspl(dataset_infos, pangle;
 # Save figures
 for fi in noise.plt.get_fignums()
     fig = noise.plt.figure(fi)
-    fig.savefig("rotorhover_noise_$(fi).png", transparent=true, dpi=300)
+    fig.savefig(joinpath(sims_path, "rotorhover_noise_$(fi).png"), transparent=true, dpi=300)
 end

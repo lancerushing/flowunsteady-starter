@@ -3,7 +3,7 @@
 #
 # Valid values: "lowest", "low", "mid", "high"
 
-const FIDELITY = "lowest"
+const FIDELITY = "low"
 
 # Load fidelity based settings
 if FIDELITY == "lowest"

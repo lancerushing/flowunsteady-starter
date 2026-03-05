@@ -1,6 +1,17 @@
 IMAGE = flowunsteady-runner:dev
 LOG = logs/$$(date +%Y%m%d_%H%M%S)
-JULIA = julia --threads auto
+
+## `--threads "auto" or "N" when (N>1)` triggers 
+##  a segfault for step1 for fidelity "low" or higher
+
+JULIA = julia --threads auto 
+#JULIA = julia
+
+STEP1 = src/step1_rotorhover.jl
+STEP2 = src/step2_rotorhover_fluid_domain.jl
+STEP3 = src/step3_rotorhover_aero_acoustics.jl
+
+RUN = $(DOCKER_RUN) $(IMAGE) $(JULIA) --project
 
 DOCKER_RUN = docker run --rm \
 	--volume $(CURDIR)/workspace:/workspace \
@@ -25,23 +36,22 @@ prepare-julia:
 
 run-step-1:
 	xhost +local:docker
-	@mkdir -p logs
-	$(DOCKER_RUN) $(IMAGE) $(JULIA) --project src/step1_rotorhover.jl 2>&1 | tee $(LOG)_step1.log
+	echo "$(RUN) $(STEP1)" >> $(LOG)_step1.log
+	$(RUN) $(STEP1) 2>&1 | tee -a $(LOG)_step1.log
 
 visualize-step-1:
 	xhost +local:docker
-	@mkdir -p logs
-	$(DOCKER_RUN) $(IMAGE) $(JULIA) --project src/step1_visualize.jl
+	$(RUN) src/step1_visualize.jl
 
 run-step-2:
 	xhost +local:docker
-	@mkdir -p logs
-	$(DOCKER_RUN) $(IMAGE) $(JULIA) --project src/step2_rotorhover_fluid_domain.jl 2>&1 | tee $(LOG)_step2.log
+	echo "$(RUN) $(STEP2)" >> $(LOG)_step2.log
+	$(RUN) $(STEP2) 2>&1 | tee -a $(LOG)_step2.log
 
 run-step-3:
 	xhost +local:docker
-	@mkdir -p logs
-	$(DOCKER_RUN) $(IMAGE) $(JULIA) --project src/step3_rotorhover_aero_acoustics.jl 2>&1 | tee $(LOG)_step3.log
+	echo "$(RUN) $(STEP3)" >> $(LOG)_step3.log
+	$(RUN) $(STEP3) 2>&1 | tee -a $(LOG)_step3.log
 
 ## Format Julia source files with JuliaFormatter (uses temp env, no project changes)
 format:
