@@ -238,7 +238,7 @@ uns.run_noise_bpm(rotors, RPM, Vinf, rho, mu, speedofsound,
                                 TE_thickness=TE_thickness,
                                 freq_bins=freq_bins,
                                 # ---------- OUTPUT OPTIONS --------------------
-                                prompt=true
+                                prompt=false
                                 );
 
 #=##############################################################################
