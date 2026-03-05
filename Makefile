@@ -1,0 +1,47 @@
+IMAGE = flowunsteady-runner:dev
+
+DOCKER_RUN = docker run --rm \
+	--volume $(CURDIR)/workspace:/workspace \
+	--volume $(CURDIR)/.julia:/home/runner/.julia \
+	--volume /tmp/.X11-unix:/tmp/.X11-unix \
+	--volume $(XDG_RUNTIME_DIR):$(XDG_RUNTIME_DIR) \
+	$(if $(WAYLAND_DISPLAY),--volume $(XDG_RUNTIME_DIR)/$(WAYLAND_DISPLAY):$(XDG_RUNTIME_DIR)/$(WAYLAND_DISPLAY)) \
+	-e DISPLAY=$(DISPLAY) \
+	-e XDG_RUNTIME_DIR=$(XDG_RUNTIME_DIR) \
+	--privileged
+
+# build a container to run julia. Container does not need context
+# see: https://docs.docker.com/build/concepts/context/#empty-context
+docker-build:
+	docker build --tag $(IMAGE) - < Dockerfile
+
+## Install Julia packages
+prepare-julia:
+	xhost +local:docker
+	$(DOCKER_RUN) -it $(IMAGE) julia --project src/_setup.jl
+
+run-step-1:
+	xhost +local:docker
+	$(DOCKER_RUN) $(IMAGE) julia --project src/step1_rotorhover.jl
+
+visualize-step-1:
+	xhost +local:docker
+	$(DOCKER_RUN) $(IMAGE) julia --project src/step1_visualize.jl
+
+run-step-2:
+	xhost +local:docker
+	$(DOCKER_RUN) $(IMAGE) julia --project src/step2_rotorhover_fluid_domain.jl
+
+run-step-3:
+	xhost +local:docker
+	$(DOCKER_RUN) $(IMAGE) julia --project src/step3_rotorhover_aero_acoustic.jl
+
+## Utility target to run bash command to explore container
+run-bash:
+	xhost +local:docker
+	$(DOCKER_RUN) -it $(IMAGE) bash
+
+## Utility target to test x11 forwarding
+test-xeyes:
+	xhost +local:docker
+	$(DOCKER_RUN) $(IMAGE) xeyes
