@@ -18,6 +18,10 @@ RUN apt-get update && \
         libbz2-dev libreadline-dev libsqlite3-dev curl \
         libncursesw5-dev xz-utils tk-dev libxml2-dev \
         libxmlsec1-dev libffi-dev liblzma-dev
+        # Clean up APT cache and lists to minimize image size
+        # if you want to publish this docker image # && \
+        # apt-get clean && \
+        # rm -rf /var/lib/apt/lists/*
 
 # Build Python 3.9.12 from source and install to /usr/local/python3.9
 # PyCall.jl (used by FLOWUnsteady) segfaults with Python 3.10+ under multi-threaded Julia.
@@ -37,10 +41,6 @@ ENV LD_LIBRARY_PATH=/usr/local/python3.9/lib:$LD_LIBRARY_PATH
 
 RUN /usr/local/python3.9/bin/pip3 install matplotlib scipy mpmath
 
-# if you want to publish this docker image,
-# add `rm -rf /var/lib/apt/lists/*` to the
-# apt-get command above
-
 ## To share gui applications (like paraview)
 ## the group and user ids NEED to match your local group and user
 ## run the `id` command locally to verify
@@ -52,7 +52,6 @@ USER runner
 # Set working directory to match project structure
 WORKDIR /workspace
 VOLUME ["/workspace"]
-
 
 # Default command: interactive bash shell for development
 CMD ["/bin/bash"]

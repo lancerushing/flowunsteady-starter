@@ -2,9 +2,6 @@ IMAGE = flowunsteady-runner:dev-py39
 LOG = logs/$$(date +%Y%m%d_%H%M%S)_$(FIDELITY)
 FIDELITY ?= lowest
 
-## All steps use --threads auto.
-## Previously step1 segfaulted with N>1 threads; root cause was PyCall.jl using
-## Python 3.10+. Fixed by building Python 3.9.12 in the image (see Dockerfile).
 STEP1RUN = $(DOCKER_RUN_HEADLESS) $(IMAGE) julia --threads auto --project src/step1_rotorhover.jl
 STEP2RUN = $(DOCKER_RUN_HEADLESS) $(IMAGE) julia --threads auto --project src/step2_rotorhover_fluid_domain.jl
 STEP3RUN = $(DOCKER_RUN_HEADLESS) $(IMAGE) julia --threads auto --project src/step3_rotorhover_aero_acoustics.jl
@@ -70,7 +67,6 @@ format:
 		using JuliaFormatter; format("/workspace/src/", verbose=true)'
 
 ## Lint Julia source files with JET static analyzer
-## NOTE: adds JET to the workspace project on first run
 lint:
 	$(DOCKER_RUN_HEADLESS) $(IMAGE) julia --project -e \
 		'import Pkg; Pkg.add("JET"); using JET; \
