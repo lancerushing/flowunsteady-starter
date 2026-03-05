@@ -20,11 +20,13 @@ data_path       = uns.def_data_path
 R, B            = uns.read_rotor(rotor_file; data_path=data_path)[[1,3]]
 
 # Simulations to plot
-sims_to_plot = [ # run_name, style, color, alpha, label
-                ("rotorhover-example-high02", "-", "dodgerblue", 1.0, "rVPM - high fidelity")
-                ("rotorhover-example-midhigh00", "--", "dodgerblue", 0.5, "rVPM - mid-high fidelity")
-                ("rotorhover-example-midlow01", ":", "dodgerblue", 0.5, "rVPM - mid-low fidelity")
-              ]
+output_dir = joinpath(PROJECT_DIR, "output")
+sims_to_plot = [ # fidelity_path, run_name, style, color, alpha, label
+    (joinpath(output_dir, "fidelity-high"),    run_name, "-",  "dodgerblue", 1.0, "rVPM - high fidelity")
+    (joinpath(output_dir, "fidelity-mid"),     run_name, "--", "dodgerblue", 0.7, "rVPM - mid fidelity")
+    (joinpath(output_dir, "fidelity-low"),     run_name, ":",  "dodgerblue", 0.5, "rVPM - low fidelity")
+    (joinpath(output_dir, "fidelity-lowest"),  run_name, ".",  "gray",       0.5, "rVPM - lowest fidelity")
+]
 
 ################################################################################
 #   CT history
@@ -66,9 +68,9 @@ nsteps_per_rev_sims = Dict()
 CTmean = Dict()
 CTstd = Dict()
 
-for (sim_run_name, stl, clr, alpha, lbl) in sims_to_plot
+for (sim_sims_path, sim_run_name, stl, clr, alpha, lbl) in sims_to_plot
 
-    simdata = CSV.read(joinpath(sims_path, sim_run_name, "singlerotor_convergence.csv"), DataFrame)
+    simdata = CSV.read(joinpath(sim_sims_path, sim_run_name, "$(sim_run_name)_convergence.csv"), DataFrame)
 
     for i in 1:nrotors
         ax.plot(simdata[2:end, 1]./360, simdata[2:end, 3 + (i-1)*4 + 1+coli], stl;
@@ -107,7 +109,7 @@ ax.spines["top"].set_visible(false)
 fig.tight_layout()
 
 # Save plot
-fig.savefig("dji9443-CTcomparison.png", dpi=300, transparent=true)
+fig.savefig(joinpath(output_dir, "dji9443-CTcomparison.png"), dpi=300, transparent=true)
 
 
 
@@ -118,7 +120,7 @@ str = """
 | Experimental             |     $(CTexp)     |   --  |
 | URANS                    |     $(round(CTurans_mean, digits=3))    |  $(round(100*abs(CTurans_mean-CTexp)/CTexp, digits=1))% |
 """
-for (sim_run_name, _, _, _, lbl) in sims_to_plot
+for (_, sim_run_name, _, _, _, lbl) in sims_to_plot
     nspaces = max(24 - length(lbl), 0)
     global str *= "| $(lbl)$(" "^nspaces) |     $(round(CTmean[sim_run_name], digits=3))    | $(round(100*abs(CTmean[sim_run_name]-CTexp)/CTexp, digits=1))% |\n"
 end
@@ -132,9 +134,9 @@ println(str)
 rotor_axis = [-1.0, 0.0, 0.0]       # Rotor centerline axis
 
 # Generate statistics (mean and deviation of loading)
-for (sim_run_name, _, _, _, _) in sims_to_plot
+for (sim_sims_path, sim_run_name, _, _, _, _) in sims_to_plot
 
-    read_path = joinpath(sims_path, sim_run_name)
+    read_path = joinpath(sim_sims_path, sim_run_name)
     save_path = read_path*"-statistics"
 
     # Process outputs between revolutions 8 and 9
@@ -160,9 +162,9 @@ ax.plot(data[!, 1], data[!, 2], "o:", label="URANS", markersize=5,
                                     color="darkred", alpha=1.0, linewidth=2.0)
 
 # Read and plot FLOWUnsteady mean blade loading and deviation
-for (sim_run_name, stl, clr, alpha, lbl) in sims_to_plot
+for (sim_sims_path, sim_run_name, stl, clr, alpha, lbl) in sims_to_plot
 
-    read_path = joinpath(sims_path, sim_run_name*"-statistics")
+    read_path = joinpath(sim_sims_path, sim_run_name*"-statistics")
 
     (rs, Gamma,
         Np, Tp) = uns.postprocess_bladeloading(read_path;
@@ -209,4 +211,4 @@ ax.spines["top"].set_visible(false)
 fig.tight_layout()
 
 # Save plot
-fig.savefig("dji9443-loadingcomparison.png", dpi=300, transparent=true)
+fig.savefig(joinpath(output_dir, "dji9443-loadingcomparison.png"), dpi=300, transparent=true)

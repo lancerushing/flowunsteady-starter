@@ -6,6 +6,7 @@ LOG = logs/$$(date +%Y%m%d_%H%M%S)
 STEP1RUN = $(DOCKER_RUN) $(IMAGE) julia --project src/step1_rotorhover.jl
 STEP2RUN = $(DOCKER_RUN) $(IMAGE) julia --threads auto --project src/step2_rotorhover_fluid_domain.jl
 STEP3RUN = $(DOCKER_RUN) $(IMAGE) julia --threads auto --project src/step3_rotorhover_aero_acoustics.jl
+STEP4RUN = $(DOCKER_RUN) $(IMAGE) julia --threads auto --project src/step4_rotorhover_post_processing.jl
 
 
 DOCKER_RUN = docker run --rm \
@@ -47,6 +48,11 @@ run-step-3:
 	xhost +local:docker
 	echo "$(STEP3RUN)" >> $(LOG)_step3.log
 	$(STEP3RUN) 2>&1 | tee -a $(LOG)_step3.log
+
+run-step-4:
+	xhost +local:docker
+	echo "$(STEP4RUN)" >> $(LOG)_step4.log
+	$(STEP4RUN) 2>&1 | tee -a $(LOG)_step4.log
 
 ## Format Julia source files with JuliaFormatter (uses temp env, no project changes)
 format:
