@@ -2,7 +2,7 @@
 import FLOWUnsteady as uns
 import FLOWVLM as vlm
 
-include(joinpath(@__DIR__, "config.jl"))
+include(joinpath(@__DIR__, "config-loader.jl"))
 
 save_path = joinpath(sims_path, run_name)
 

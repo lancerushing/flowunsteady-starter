@@ -10,7 +10,7 @@ import DataFrames: DataFrame
 import Printf: @printf
 import PyPlot: @L_str
 
-include(joinpath(@__DIR__, "config.jl"))
+include(joinpath(@__DIR__, "config-loader.jl"))
 
 uns.formatpyplot()
 

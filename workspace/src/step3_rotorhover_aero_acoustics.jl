@@ -12,7 +12,7 @@ We load FLOWUnsteady and the `FLOWUnsteady.noise` module:
 import FLOWUnsteady as uns
 import FLOWUnsteady: gt, vlm, noise
 
-include(joinpath(@__DIR__, "config.jl"))
+include(joinpath(@__DIR__, "config-loader.jl"))
 
 # Path where to read and save simulation data
 read_path       = joinpath(sims_path, run_name)

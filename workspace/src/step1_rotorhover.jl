@@ -1,49 +1,9 @@
 
-#=
-Use the following parameters to obtain the desired fidelity
-
----- MID-LOW FIDELITY ---
-n               = 20                        # Number of blade elements per blade
-nsteps_per_rev  = 36                        # Time steps per revolution
-p_per_step      = 4                         # Sheds per time step
-sigma_rotor_surf= R/10                      # Rotor-on-VPM smoothing radius
-vpm_integration = vpm.euler                 # VPM time integration scheme
-vpm_SFS         = vpm.SFS_none              # VPM LES subfilter-scale model
-shed_starting   = false                     # Whether to shed starting vortex
-suppress_fountain    = true                 # Suppress hub fountain effect
-sigmafactor_vpmonvlm = 1.0                  # Shrink particles by this factor when
-                                            #  calculating VPM-on-VLM/Rotor induced velocities
-
----- MID-HIGH FIDELITY ---
-n               = 50
-nsteps_per_rev  = 72
-p_per_step      = 2
-sigma_rotor_surf= R/10
-sigmafactor_vpmonvlm = 1.0
-shed_starting   = false
-suppress_fountain    = true
-vpm_integration = vpm.rungekutta3
-vpm_SFS         = vpm.SFS_none
-
----- HIGH FIDELITY -----
-n               = 50
-nsteps_per_rev  = 360
-p_per_step      = 2
-sigma_rotor_surf= R/80
-sigmafactor_vpmonvlm = 5.5
-shed_starting   = true
-suppress_fountain    = false
-vpm_integration = vpm.rungekutta3
-vpm_SFS         = vpm.DynamicSFS(vpm.Estr_fmm, vpm.pseudo3level_positive;
-                                    alpha=0.999, maxC=1.0,
-                                    clippings=[vpm.clipping_backscatter])
-=#
-
 import FLOWUnsteady as uns
 import FLOWVLM as vlm
 import FLOWVPM as vpm
 
-include(joinpath(@__DIR__, "config.jl"))
+include(joinpath(@__DIR__, "config-loader.jl"))
 
 save_path       = joinpath(sims_path, run_name)    # Where to save this simulation
 

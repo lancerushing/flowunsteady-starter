@@ -10,7 +10,7 @@
 import FLOWUnsteady as uns
 import FLOWUnsteady: vpm, gt, dot, norm
 
-include(joinpath(@__DIR__, "config.jl"))
+include(joinpath(@__DIR__, "config-loader.jl"))
 
 # --------------- INPUTS AND OUTPUTS -------------------------------------------
 read_path       = joinpath(sims_path, run_name)           # Where to read simulation from
@@ -83,7 +83,7 @@ end
 # If you come back to the output folder later, you can see exactly
 # what parameters were used to generate it.
 cp(@__FILE__, joinpath(save_path, splitdir(@__FILE__)[2]); force=true)
-cp(joinpath(@__DIR__, "config.jl"), joinpath(save_path, "config.jl"); force=true)
+cp(joinpath(@__DIR__, "config-loader.jl"), joinpath(save_path, "config-loader.jl"); force=true)
 
 # Generate function to process the field clipping particle sizes
 preprocessing_pfield = uns.generate_preprocessing_fluiddomain_pfield(maxsigma, maxmagGamma;
