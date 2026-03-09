@@ -26,8 +26,7 @@ const run_name = "rotorhover"
 const nrevs    = 10                         # Number of revolutions in simulation
 
 # Paths
-const PROJECT_DIR = dirname(Base.active_project())
-const sims_path   = joinpath(PROJECT_DIR, "output", "fidelity-$(FIDELITY)")
+const sims_path   = joinpath("/output", "fidelity-$(FIDELITY)")
 
 # Rotor geometry
 const rotor_file  = "DJI9443.csv"

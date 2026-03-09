@@ -7,8 +7,8 @@ include(joinpath(@__DIR__, "config-loader.jl"))
 
 save_path       = joinpath(sims_path, run_name)    # Where to save this simulation
 
+println("save_path: ", save_path);
 mkpath(save_path)
-println("save_path: ", save_path)
 
 # ----------------- GEOMETRY PARAMETERS ----------------------------------------
 
@@ -228,7 +228,7 @@ restart_file = nothing
 #       time step, and `run_simulation` will start this simulation with the
 #       particle field found in the restart simulation.
 
-# restart_file = "/path/to/a/previous/simulation/rotorhover-example_pfield.360"
+# restart_file = "/output/fidelity-high/rotorhover/rotorhover_pfield.120"
 
 
 # ------------- 4) MONITORS DEFINITIONS ----------------------------------------
@@ -291,6 +291,7 @@ uns.run_simulation(simulation, nsteps;
                     restart_vpmfile=restart_file,
                     # ----- OUTPUT OPTIONS ------------------
                     save_path=save_path,
+                    create_savepath=false,
                     run_name=run_name,
                     save_wopwopin=true,  # <--- Generates input files for PSU-WOPWOP noise analysis
                     save_code=@__FILE__

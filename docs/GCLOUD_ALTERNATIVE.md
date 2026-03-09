@@ -54,7 +54,7 @@ gcloud compute instances create flowunsteady \
     --machine-type n2-highcpu-32 \
     --image-family debian-12 \
     --image-project debian-cloud \
-    --boot-disk-size 30GB \
+    --boot-disk-size 10GB \
     --boot-disk-type pd-ssd \
     --provisioning-model SPOT \
     --instance-termination-action STOP
@@ -74,17 +74,20 @@ gcloud compute disks create flowunsteady-data \
 gcloud compute instances attach-disk flowunsteady \
     --disk flowunsteady-data \
     --zone us-central1-a
+
+gcloud compute ssh flowunsteady --tunnel-through-iap --zone us-central1-a
+
 ```
 
 On the instance, format and mount (first time only):
 
 ```bash
 sudo mkfs -t ext4 /dev/sdb
-sudo mkdir -p /ebs
-sudo mount /dev/sdb /ebs
+sudo mkdir -p /mnt/output
+sudo mount /dev/sdb /mnt/output
 
 # Auto-mount on reboot
-echo "$(sudo blkid -s UUID -o value /dev/sdb)  /ebs  ext4  defaults  0  2" \
+echo "$(sudo blkid -s UUID -o value /dev/sdb)  /mnt/output  ext4  defaults  0  2" \
     | sudo tee -a /etc/fstab
 ```
 
@@ -108,8 +111,8 @@ newgrp docker
 ## Set Up Output Directory
 
 ```bash
-sudo mkdir -p /ebs/output
-sudo chown 1000:1000 /ebs/output   # match runner uid in container
+sudo mkdir -p /mnt/output/output
+sudo chown 1000:1000 /mnt/output/output   # match runner uid in container
 ```
 
 ## Clone and Configure
@@ -123,7 +126,7 @@ cd flowunsteady-starter
 Edit `Makefile` to point `OUTPUT_PATH` at the disk:
 
 ```makefile
-OUTPUT_PATH = /ebs/output
+OUTPUT_PATH = /mnt/output/output
 ```
 
 ## Build and Prepare

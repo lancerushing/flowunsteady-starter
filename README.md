@@ -38,12 +38,12 @@ Outputs are written to `workspace/output/fidelity-<level>/`.
 Pass `FIDELITY=<level>` to any step target. Valid levels:
 
 
-| Level    | `n` | Steps/rev | Use              | Step 1 RunTime |
-| -------- | --- | --------- | ---------------- | -------------- |
-| `lowest` |  20 |         6 | Quick smoke test | 2 minutes      |
-| `low`    |  20 |        36 | Development      | 24 minutes     |
-| `mid`    |  50 |        72 | Production       | ? hours        |
-| `high`   |  50 |       360 | High-accuracy    | ?? hours       |
+| Level    | `n` | Steps/rev | Use              | Step 1 RunTime | Step 2     | Step 3     |
+| -------- | --- | --------- | ---------------- | -------------- | ---------- | ---------- |
+| `lowest` |  20 |         6 | Quick smoke test | 2 minutes      | 10 minutes | ?? minutes |
+| `low`    |  20 |        36 | Development      | 24 minutes     | 10 minutes | ?? minutes |
+| `mid`    |  50 |        72 | Production       | 6 hours        |  6 minutes | ?? minutes |
+| `high`   |  50 |       360 | High-accuracy    | ?? hours       | ?? minutes | ?? minutes |
 
 * Run times measured on AMD Ryzen 5 5600X
 

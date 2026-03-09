@@ -1,6 +1,7 @@
 IMAGE = flowunsteady-runner:dev-py39
 LOG = logs/$$(date +%Y%m%d_%H%M%S)_$(FIDELITY)
 FIDELITY ?= lowest
+OUTPUT_PATH = /mnt/unlocked/flowunstead_output
 
 STEP1RUN = $(DOCKER_RUN_HEADLESS) $(IMAGE) julia --threads auto --project src/step1_rotorhover.jl
 STEP2RUN = $(DOCKER_RUN_HEADLESS) $(IMAGE) julia --threads auto --project src/step2_rotorhover_fluid_domain.jl
@@ -10,6 +11,7 @@ STEP4RUN = $(DOCKER_RUN_HEADLESS) $(IMAGE) julia --threads auto --project src/st
 
 DOCKER_RUN = docker run --rm \
 	--volume $(CURDIR)/workspace:/workspace \
+	--volume $(OUTPUT_PATH):/output \
 	--volume $(CURDIR)/.julia:/home/runner/.julia \
 	--volume /tmp/.X11-unix:/tmp/.X11-unix \
 	--volume $(XDG_RUNTIME_DIR):$(XDG_RUNTIME_DIR) \
@@ -23,6 +25,7 @@ DOCKER_RUN = docker run --rm \
 # Headless variant: no X11 forwarding, matplotlib renders to PNG without a display
 DOCKER_RUN_HEADLESS = docker run --rm \
 	--volume $(CURDIR)/workspace:/workspace \
+	--volume $(OUTPUT_PATH):/output \
 	--volume $(CURDIR)/.julia:/home/runner/.julia \
 	-e OMP_NUM_THREADS=$(shell nproc) \
 	-e FIDELITY=$(FIDELITY) \
