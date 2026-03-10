@@ -168,6 +168,16 @@ Restore next time
 gunzip -c /mnt/persistent-disk/flowunsteady-runner-dev-py39.tar.gz | docker load
 ```
 
+## Upload PSU-WOPWOP Binary
+
+Step 3 requires `workspace/bin/wopwop3` (not included). Copy it from your local machine:
+
+```bash
+# From your local machine:
+gcloud compute scp --tunnel-through-iap --zone us-central1-a \
+    ./workspace/bin/wopwop3 flowunsteady:~/flowunsteady-starter/workspace/bin/wopwop3
+```
+
 ## Run Simulation
 
 ```bash
