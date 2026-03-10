@@ -14,6 +14,8 @@ elseif FIDELITY == "mid"
     include(joinpath(@__DIR__, "fidelity-mid.jl"))
 elseif FIDELITY == "high"
     include(joinpath(@__DIR__, "fidelity-high.jl"))
+elseif FIDELITY == "almost-high"
+    include(joinpath(@__DIR__, "fidelity-almost-high.jl"))
 else
     error("Unknown FIDELITY value: \"$(FIDELITY)\". Expected \"lowest\", \"low\", \"mid\", or \"high\".")
 end

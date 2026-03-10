@@ -2,12 +2,22 @@
 
 Assumes gcloud CLI is installed and authenticated (`gcloud auth login`).
 
-> **Cost warning:** `n2-highcpu-64` in `us-central1` runs ~$2.24/hr on-demand (~$0.67/hr spot).
-> Delete the instance when done.
+> **For experienced users.** Cloud infrastructure can incur unexpected costs if resources are not
+> cleaned up promptly. Spot VMs may be preempted mid-simulation with no refund for partial work.
+> Persistent disks and buckets continue billing even when the instance is stopped or deleted.
+> Monitor your GCP billing dashboard and set a budget alert before proceeding.
+>
+> **Cost:** `n2-highcpu-64` spot in `us-central1` runs ~$0.67/hr. Persistent disk (2 TB)
+> costs ~$0.08/GB/month (~$163/month) regardless of whether the instance is running.
+> Delete both the instance **and** the disk when done.
 
 ## Create Project
 
 ```bash
+## check your configurations
+gcloud config configurations list
+gcloud config configurations activate <--your-configuration-->
+
 gcloud projects create flowunsteady --name="FLOWUnsteady Simulation"
 gcloud config set project flowunsteady
 
@@ -51,7 +61,7 @@ gcloud compute project-info describe --project flowunsteady \
 # Spot VM (~70% cheaper than on-demand; may be preempted)
 gcloud compute instances create flowunsteady \
     --zone us-central1-a \
-    --machine-type n2-highcpu-32 \
+    --machine-type n2-highcpu-64 \
     --image-family debian-12 \
     --image-project debian-cloud \
     --boot-disk-size 10GB \
@@ -60,7 +70,8 @@ gcloud compute instances create flowunsteady \
     --instance-termination-action STOP
 ```
 
-> `n2-highcpu-64` = 64 vCPU, 64 GB RAM. If the simulation runs out of memory, use
+> `n2-highcpu-32` = 64 vCPU, 64 GB RAM. If the simulation runs out of memory, use
+> `n2-highcpu-64` = 32 vCPU, 64 GB RAM. If the simulation runs out of memory, use
 > `n2-standard-32` (32 vCPU, 128 GB) instead.
 
 ## Attach Persistent Disk
@@ -82,13 +93,21 @@ gcloud compute ssh flowunsteady --tunnel-through-iap --zone us-central1-a
 On the instance, format and mount (first time only):
 
 ```bash
-sudo mkfs -t ext4 /dev/sdb
-sudo mkdir -p /mnt/output
-sudo mount /dev/sdb /mnt/output
+sudo mkfs -t ext4 /dev/sdb # first time only
+
+sudo mkdir -p /mnt/persistent-disk
+sudo mount /dev/sdb /mnt/persistent-disk
 
 # Auto-mount on reboot
-echo "$(sudo blkid -s UUID -o value /dev/sdb)  /mnt/output  ext4  defaults  0  2" \
+echo "$(sudo blkid -s UUID -o value /dev/sdb)  /mnt/persistent-disk  ext4  defaults  0  2" \
     | sudo tee -a /etc/fstab
+```
+
+## Create Backup Bucket
+
+```bash
+# Bucket names must be globally unique; project ID prefix avoids conflicts
+gsutil mb -l us-central1 gs://flowunsteady-$(gcloud config get-value project)
 ```
 
 ## Connect via IAP
@@ -102,7 +121,7 @@ gcloud compute ssh flowunsteady --tunnel-through-iap --zone us-central1-a
 ## Install Tools
 
 ```bash
-sudo apt-get update && sudo apt-get install -y docker.io git
+sudo apt-get update && sudo apt-get install -y docker.io git make screen
 sudo systemctl enable --now docker
 sudo usermod -aG docker $USER
 newgrp docker
@@ -111,8 +130,8 @@ newgrp docker
 ## Set Up Output Directory
 
 ```bash
-sudo mkdir -p /mnt/output/output
-sudo chown 1000:1000 /mnt/output/output   # match runner uid in container
+sudo mkdir -p /mnt/persistent-disk/flowunsteady_output
+sudo chown 1000:1003 /mnt/persistent-disk/flowunsteady_output   # match runner uid in container
 ```
 
 ## Clone and Configure
@@ -126,27 +145,42 @@ cd flowunsteady-starter
 Edit `Makefile` to point `OUTPUT_PATH` at the disk:
 
 ```makefile
-OUTPUT_PATH = /mnt/output/output
+OUTPUT_PATH = /mnt/persistent-disk/flowunsteadRy_output
 ```
 
 ## Build and Prepare
 
 ```bash
-make docker-build      # ~20 min (compiles Python 3.9 from source)
+make docker-build      # ~5 min (compiles Python 3.9 from source)
 mkdir -p ./.julia
-make prepare-julia     # ~10-30 min (downloads Julia packages)
+make prepare-julia     # ~2 min (downloads/compiles Julia packages)
+```
+
+### Optional save the docker image:
+
+```bash
+docker save flowunsteady-runner:dev-py39 | gzip > /mnt/persistent-disk/flowunsteady-runner-dev-py39.tar.gz
+```
+
+Restore next time
+
+```bash
+gunzip -c /mnt/persistent-disk/flowunsteady-runner-dev-py39.tar.gz | docker load
 ```
 
 ## Run Simulation
 
 ```bash
+## Start a "screen"
+screen
+make run-step-1 FIDELITY=lowest # 2 mins
 make run-step-1 FIDELITY=high   # ~hours; logs to logs/
 make run-step-2
 make run-step-3
 make run-step-4
 ```
 
-Output is written to `/ebs/output/fidelity-<level>/`.
+Output is written to `/mnt/persistent-disk/output/fidelity-<level>/`.
 
 ## Retrieve Results
 
@@ -154,13 +188,24 @@ Output is written to `/ebs/output/fidelity-<level>/`.
 # From your local machine:
 gcloud compute scp --recurse \
     --tunnel-through-iap --zone us-central1-a \
-    flowunsteady:/ebs/output ./output
+    flowunsteady:/mnt/persistent-disk/flowunsteady_output ./flowunsteady_output
 ```
 
 To sync to GCS after each step (recommended for spot instances):
 
 ```bash
-gsutil -m rsync -r /ebs/output gs://your-bucket/flowunsteady-output
+# Authenticate with storage write access (required — default GCE service account has read-only storage scope)
+gcloud auth login --update-adc
+
+while true; do
+    gsutil -m rsync -r /mnt/persistent-disk/flowunsteady_output gs://flowunsteady-$(gcloud config get-value project)/flowunsteady_output
+    sleep 120
+done
+
+flowunsteady-flowunsteady/flowunsteady_output/fidelity-high/rotorhover/
+gsutil ls gs://flowunsteady-flowunsteady/flowunsteady_output/fidelity-high/rotorhover/loading_*.*
+
+
 ```
 
 ## Cleanup
@@ -169,4 +214,9 @@ gsutil -m rsync -r /ebs/output gs://your-bucket/flowunsteady-output
 # Delete instance and data disk (sync to GCS first)
 gcloud compute instances delete flowunsteady --zone us-central1-a
 gcloud compute disks delete flowunsteady-data --zone us-central1-a
+
+gcloud compute instances delete flowunsteady --zone us-central1-a
+
+# Remove bucket and all contents (irreversible — download data first)
+gsutil -m rm -r gs://flowunsteady-$(gcloud config get-value project)
 ```

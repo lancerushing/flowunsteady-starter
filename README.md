@@ -37,15 +37,18 @@ Outputs are written to `workspace/output/fidelity-<level>/`.
 
 Pass `FIDELITY=<level>` to any step target. Valid levels:
 
-
 | Level    | `n` | Steps/rev | Use              | Step 1 RunTime | Step 2     | Step 3     |
 | -------- | --- | --------- | ---------------- | -------------- | ---------- | ---------- |
 | `lowest` |  20 |         6 | Quick smoke test | 2 minutes      | 10 minutes | ?? minutes |
 | `low`    |  20 |        36 | Development      | 24 minutes     | 10 minutes | ?? minutes |
 | `mid`    |  50 |        72 | Production       | 6 hours        |  6 minutes | ?? minutes |
-| `high`   |  50 |       360 | High-accuracy    | ?? hours       | ?? minutes | ?? minutes |
+| `high`   |  50 |       360 | High-accuracy    | ?? days        | ??         | ??         |
 
-* Run times measured on AMD Ryzen 5 5600X
+* Run times measured on AMD Ryzen 5 5600X (only 12 cores)
+
+#### Performance recommendations
+
+Unless you have a 64+ core machine available, consider running on AWS or GCP. With spot pricing, a full simulation costs roughly $10 — see [docs/HOWTO_AWS.md](docs/HOWTO_AWS.md) or [docs/HOWTO_GCLOUD.md](docs/HOWTO_GCLOUD.md).
 
 ```bash
 make run-step-1 FIDELITY=lowest   # default

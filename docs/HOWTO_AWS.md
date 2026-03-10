@@ -2,8 +2,18 @@
 
 Assumes AWS CLI is installed and configured (`aws configure`).
 
-> **Cost warning:** `c7i.16xlarge` in `us-west-2` runs ~$2.86/hr on-demand (~$137/day).
-> Stop or terminate the instance when not in use.
+> **For experienced users.** AWS resources continue billing until explicitly terminated.
+> Spot instances may be interrupted mid-simulation with no refund for partial work.
+> EBS volumes accrue charges even when the instance is stopped. Monitor your AWS billing
+> dashboard and set a budget alert before proceeding.
+>
+> **Cost:** `c7i.16xlarge` spot in `us-west-2` runs ~$0.86/hr. EBS gp3 (2 TB) costs
+> ~$0.08/GB/month (~$163/month) regardless of instance state.
+> Terminate the instance **and** delete the volume when done.
+
+## NOTICE
+
+> These instructions are incomplete.  I switched over to GCLOUD after a few minutes (I didn't feel like messing with VPCs tonight)
 
 ## Launch Instance
 
@@ -163,7 +173,7 @@ scp -r ec2-user@$PUBLIC_IP:/ebs/output ./output
 To sync output to S3 after each step (optional but recommended for spot instances):
 
 ```bash
-aws s3 sync /ebs/output s3://your-bucket/flowunsteady-output
+aws s3 sync /ebs/output s3://flowunsteady-flowunsteady/flowunsteady-output
 ```
 
 ## Cleanup
