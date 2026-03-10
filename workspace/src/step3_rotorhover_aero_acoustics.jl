@@ -38,7 +38,7 @@ save_ww_path    = joinpath(sims_path, run_name*"-aero_acoustics")
 mkpath(save_ww_path)
 
 # Path to PSU-WOPWOP binary (not included in FLOWUnsteady)
-wopwopbin       = joinpath(PROJECT_DIR, "bin/wopwop3")
+wopwopbin       = joinpath(@__DIR__, "..", "bin", "wopwop3")
 
 # Make this `true` if the aero simulation used the quasi-steady solver. If so,
 # PSU-WOPWOP will assume that the blade loading and geometry stays constant
