@@ -23,7 +23,7 @@ VSPGeom = "9b3f6a95-fce2-4bc5-94a2-f99b39986ea6"
 [sources]
 AirfoilPrep = {rev = "master", url = "https://github.com/byuflowlab/AirfoilPrep.jl"}
 BPM = {rev = "master", url = "https://github.com/byuflowlab/BPM.jl"}
-FLOWNoise = {rev = "master", url = "https://github.com/byuflowlab/FLOWNoise"}
+FLOWNoise = {rev = "master", url = "https://github.com/lancerushing/FLOWNoise"}
 FLOWUnsteady = {rev = "patch-for-bpm-3.0.0", url = "https://github.com/lancerushing/FLOWUnsteady"}
 FLOWVLM = {rev = "master", url = "https://github.com/byuflowlab/FLOWVLM"}
 FLOWVPM = {rev = "master", url = "https://github.com/byuflowlab/FLOWVPM.jl"}
